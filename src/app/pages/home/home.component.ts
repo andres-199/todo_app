@@ -13,14 +13,9 @@ import { noWhiteSpaceValidator } from './validators/no-white-space.validator'
 })
 export class HomeComponent {
     tasks = signal<Task[]>([
-        {
-            id: '1',
-            state: 'completed',
-            title: 'Learn JavaScript',
-            isCompleted: true,
-        },
-        { id: '2', state: null, title: 'Buy a unicorn', isCompleted: false },
-        { id: '3', state: 'editing', title: 'Make dishes', isCompleted: false },
+        { id: '1', title: 'Learn JavaScript' },
+        { id: '2', title: 'Buy a unicorn' },
+        { id: '3', title: 'Make dishes' },
     ])
 
     inputTaskCtrl = new FormControl('', {
@@ -54,21 +49,18 @@ export class HomeComponent {
     }
 
     private updateTask(task: Task) {
-        this.tasks.update((tasks) => {
-            const index = tasks.findIndex((_task) => _task.id === task.id)
-            if (index > -1) {
-                tasks.splice(index, 1, task)
-            }
-            return tasks
-        })
+        this.tasks.update((tasksState) =>
+            tasksState.map((_task) => {
+                if (_task.id === task.id) {
+                    return task
+                }
+                return { ..._task, isEditing: false }
+            })
+        )
     }
 
     handleUpdateTask(task: Task, update: Partial<Task>) {
-        this.updateTask({
-            ...task,
-            ...update,
-            state: update.isCompleted ? 'completed' : null,
-        })
+        this.updateTask({ ...task, ...update })
     }
 
     handleClickDeleteTask(task: Task) {

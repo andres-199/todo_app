@@ -1,6 +1,6 @@
 export interface Task {
-	id: string
-	state: 'completed' | 'editing' | null
-	title: string
-	isCompleted: boolean
+    id: string
+    title: string
+    isCompleted?: boolean
+    isEditing?: boolean
 }
