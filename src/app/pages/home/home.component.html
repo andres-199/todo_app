@@ -21,7 +21,7 @@
                     (dblclick)="handleUpdateTask(task, { isEditing: true })"
                     [class.editing]="task.isEditing"
                     [class.completed]="task.isCompleted"
-                    *ngFor="let task of tasks()"
+                    *ngFor="let task of filteredTasks()"
                 >
                     <div class="view">
                         <input
@@ -59,21 +59,32 @@
         <footer class="footer">
             <!-- This should be `0 items left` by default -->
             <span class="todo-count"
-                ><strong>{{ tasks().length }}</strong> item<span
-                    *ngIf="tasks().length > 1"
-                    >s</span
-                >
+                ><strong>{{ filteredTasks().length }}{{ ' ' }}</strong>
+                <span *ngIf="filteredTasks().length > 1; else item">items</span>
+                <ng-template #item>item</ng-template>
             </span>
             <!-- Remove this if you don't implement routing -->
             <ul class="filters">
-                <li>
-                    <a routerLink="/" class="selected">All</a>
+                <li (click)="handleChangeFilter(taskFilter.ALL)">
+                    <a
+                        routerLink="/"
+                        [class.selected]="filter() === taskFilter.ALL"
+                        >All</a
+                    >
                 </li>
-                <li>
-                    <a routerLink="/pending">Pending</a>
+                <li (click)="handleChangeFilter(taskFilter.PENDING)">
+                    <a
+                        routerLink="/pending"
+                        [class.selected]="filter() === taskFilter.PENDING"
+                        >Pending</a
+                    >
                 </li>
-                <li>
-                    <a routerLink="/completed">Completed</a>
+                <li (click)="handleChangeFilter(taskFilter.COMPLETED)">
+                    <a
+                        routerLink="/completed"
+                        [class.selected]="filter() === taskFilter.COMPLETED"
+                        >Completed</a
+                    >
                 </li>
             </ul>
             <!-- Hidden if no completed items are left ↓ -->

@@ -1,8 +1,18 @@
-import { Component, signal } from '@angular/core'
-import { Task } from './interfaces/task.interface'
+import { Component, computed, effect, signal } from '@angular/core'
+import { Task, TaskFilter } from './interfaces/task.interface'
 import { CommonModule } from '@angular/common'
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms'
 import { noWhiteSpaceValidator } from './validators/no-white-space.validator'
+
+const filterTasks = (filter: TaskFilter, tasks: Task[]) => {
+    if (filter === TaskFilter.COMPLETED) {
+        return tasks.filter((task) => task.isCompleted)
+    }
+    if (filter === TaskFilter.PENDING) {
+        return tasks.filter((task) => !task.isCompleted)
+    }
+    return tasks
+}
 
 @Component({
     selector: 'app-home',
@@ -12,16 +22,28 @@ import { noWhiteSpaceValidator } from './validators/no-white-space.validator'
     styleUrl: './home.component.css',
 })
 export class HomeComponent {
-    tasks = signal<Task[]>([
-        { id: '1', title: 'Learn JavaScript' },
-        { id: '2', title: 'Buy a unicorn' },
-        { id: '3', title: 'Make dishes' },
-    ])
+    taskFilter = TaskFilter
+    tasks = signal<Task[]>([])
+    filter = signal<TaskFilter>(TaskFilter.ALL)
+    filteredTasks = computed<Task[]>(() => {
+        return filterTasks(this.filter(), this.tasks())
+    })
 
     inputTaskCtrl = new FormControl('', {
         nonNullable: true,
         validators: [Validators.required, noWhiteSpaceValidator],
     })
+
+    constructor() {
+        effect(() => {
+            localStorage.setItem('tasks', JSON.stringify(this.tasks()))
+        })
+    }
+
+    ngOnInit() {
+        const storedTasks = JSON.parse(localStorage.getItem('tasks') ?? '[]')
+        this.tasks.set(storedTasks)
+    }
 
     handleChangeNewTask() {
         if (this.inputTaskCtrl.valid) {
@@ -65,5 +87,9 @@ export class HomeComponent {
 
     handleClickDeleteTask(task: Task) {
         this.deleteTask(task)
+    }
+
+    handleChangeFilter(taskFilter: TaskFilter) {
+        this.filter.set(taskFilter)
     }
 }
