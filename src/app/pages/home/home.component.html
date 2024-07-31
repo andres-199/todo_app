@@ -17,51 +17,55 @@
         <!-- This section should be hidden by default and shown when there are todos -->
         <section class="main">
             <ul class="todo-list">
-                <li
-                    (dblclick)="handleUpdateTask(task, { isEditing: true })"
-                    [class.editing]="task.isEditing"
-                    [class.completed]="task.isCompleted"
-                    *ngFor="let task of filteredTasks()"
-                >
-                    <div class="view">
+                @for (task of filteredTasks(); track task.id) {
+                    <li
+                        (dblclick)="handleUpdateTask(task, { isEditing: true })"
+                        [class.editing]="task.isEditing"
+                        [class.completed]="task.isCompleted"
+                    >
+                        <div class="view">
+                            <input
+                                #inputIsCompleted
+                                (change)="
+                                    handleUpdateTask(task, {
+                                        isCompleted: inputIsCompleted.checked,
+                                    })
+                                "
+                                class="toggle"
+                                type="checkbox"
+                                [checked]="task.isCompleted"
+                            />
+                            <label>{{ task.title }}</label>
+                            <button
+                                (click)="handleClickDeleteTask(task)"
+                                class="destroy"
+                            ></button>
+                        </div>
                         <input
-                            #inputIsCompleted
-                            (change)="
+                            #inputTitle
+                            (keyup.enter)="
                                 handleUpdateTask(task, {
-                                    isCompleted: inputIsCompleted.checked,
+                                    title: inputTitle.value,
+                                    isEditing: false,
                                 })
                             "
-                            class="toggle"
-                            type="checkbox"
-                            [checked]="task.isCompleted"
+                            class="edit"
+                            [value]="task.title"
                         />
-                        <label>{{ task.title }}</label>
-                        <button
-                            (click)="handleClickDeleteTask(task)"
-                            class="destroy"
-                        ></button>
-                    </div>
-                    <input
-                        #inputTitle
-                        (keyup.enter)="
-                            handleUpdateTask(task, {
-                                title: inputTitle.value,
-                                isEditing: false,
-                            })
-                        "
-                        class="edit"
-                        [value]="task.title"
-                    />
-                </li>
+                    </li>
+                }
             </ul>
         </section>
         <!-- This footer should be hidden by default and shown when there are todos -->
         <footer class="footer">
             <!-- This should be `0 items left` by default -->
-            <span class="todo-count"
-                ><strong>{{ filteredTasks().length }}{{ ' ' }}</strong>
-                <span *ngIf="filteredTasks().length > 1; else item">items</span>
-                <ng-template #item>item</ng-template>
+            <span class="todo-count">
+                <strong>{{ filteredTasks().length }}{{ ' ' }}</strong>
+                @if (filteredTasks().length > 1) {
+                    <span>items</span>
+                } @else {
+                    <span>item</span>
+                }
             </span>
             <!-- Remove this if you don't implement routing -->
             <ul class="filters">
